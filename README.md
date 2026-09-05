@@ -444,6 +444,21 @@ Options:
 **No credential is stored in the scheduled task**, and none is needed — Claude
 Code sends its own with each request.
 
+**This is logon autostart, not boot autostart.** The task uses an `Interactive`
+principal with an at-logon trigger: the proxy starts a few seconds after you
+log in, and nothing runs while you are logged off. That is intentional — the
+proxy listens on loopback and only serves the Claude Code running in your own
+session, so there is nothing for it to do when nobody is logged in. Starting
+while logged off would require an `S4U` principal, which also needs an
+elevated PowerShell to register (a non-elevated attempt fails with *Access is
+denied*); it is deliberately not used. Installing needs no elevation: the task
+runs as your own account with `RunLevel Limited`.
+
+After registering, the installer reads the task back from Task Scheduler and
+verifies the stored principal, action, and working directory actually match
+what it requested. If Windows stored anything different, the installer reports
+a failure listing the mismatches instead of printing a misleading success.
+
 Under `-Service` the proxy writes to `logs\proxy.log`, rotating at 1024 KB and
 keeping one previous generation, so disk use stays bounded at roughly 2 MB. If
 the server process dies, a supervisor loop restarts it with 5→60 second

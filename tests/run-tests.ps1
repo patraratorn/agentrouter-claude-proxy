@@ -106,6 +106,12 @@ try {
     }
     Write-Host "[ ok  ] $checked scheduled-task enum arguments valid on this system" -ForegroundColor Green
 
+    # ---- 1c. autostart scripts: principal, read-back, downgrade detection ---
+    # Deterministic and side-effect free: no task is registered or modified.
+    Write-Host "`n[test ] autostart script tests" -ForegroundColor Cyan
+    & (Join-Path $here 'autostart-tests.ps1')
+    if ($LASTEXITCODE -ne 0) { throw 'autostart tests failed' }
+
     # ---- 2. start the mock upstream --------------------------------------
     $mockProc = Start-Process -FilePath $python -PassThru -WindowStyle Hidden `
         -WorkingDirectory $here `
